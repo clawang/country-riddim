@@ -6,7 +6,7 @@ import Icon from './icon';
 import {
   isAudio, readBlobURL, download, rename,
 } from './utils';
-import { decodeAudioBuffer, sliceAudioBuffer } from './audio-helper';
+import { decodeAudioBuffer, sliceAudioBuffer, fetchAudioBuffer, concatAudioBuffer } from './audio-helper';
 import encode from './worker-client';
 import './index.less';
 import {
@@ -17,6 +17,10 @@ import {
   replayIcon,
   spinIcon,
 } from './icons';
+import playImg from './icons/play.png';
+import pauseImg from './icons/pause.png';
+import replayImg from './icons/replay.png';
+import drop from './country-riddim.mp3';
 import { useClassicState } from './hooks';
 import { SUpportedFormat } from './types';
 
@@ -25,6 +29,7 @@ function App() {
     file: File | null;
     decoding: boolean;
     audioBuffer: AudioBuffer | null;
+    countryRiddim: AudioBuffer | null;
     paused: boolean;
     startTime: number;
     endTime: number;
@@ -34,6 +39,7 @@ function App() {
     file: null,
     decoding: false,
     audioBuffer: null,
+    countryRiddim: null,
     paused: true,
     startTime: 0,
     endTime: Infinity,
@@ -41,9 +47,17 @@ function App() {
     processing: false,
   });
 
+  React.useEffect(() => {
+    fetchAudioBuffer(drop).then((audioBuffer) => {
+      setState({
+        countryRiddim: audioBuffer,
+      });
+    });
+  }, [setState]);
+
   const handleFileChange = async (file: File) => {
     if (!isAudio(file)) {
-      alert('请选择合法的音频文件');
+      alert('Please select a valid audio file.');
       return;
     }
 
@@ -86,8 +100,7 @@ function App() {
 
   const handleEnd = () => {
     setState({
-      currentTime: state.startTime,
-      paused: false,
+      paused: true,
     });
   };
 
@@ -104,6 +117,22 @@ function App() {
     });
   };
 
+  const handleStartInputChange = (evt) => {
+    const time = Number(evt.target?.value);
+    setState({
+      startTime: time,
+      currentTime: time-1,
+    });
+  };
+
+  const handleEndInputChange = (evt) => {
+    const time = Number(evt.target?.value);
+    setState({
+      endTime: time,
+      currentTime: time-1,
+    });
+  };
+
   const handleEncode = (type: SUpportedFormat) => {
     const {
       startTime, endTime, audioBuffer, file,
@@ -112,17 +141,28 @@ function App() {
 
     const { length, duration } = audioBuffer;
 
-    const audioSliced = sliceAudioBuffer(
+    const audioSlices: AudioBuffer[] = new Array(3);
+
+    audioSlices[0] = sliceAudioBuffer(
       audioBuffer,
+      0,
       Math.floor(length * startTime / duration),
+    );
+
+    audioSlices[1] = state.countryRiddim!;
+
+    audioSlices[2] = sliceAudioBuffer(
+      audioBuffer,
       Math.floor(length * endTime / duration),
     );
+
+    const audioResult = concatAudioBuffer(audioSlices);
 
     setState({
       processing: true,
     });
 
-    encode(audioSliced, type)
+    encode(audioResult, type)
       .then(readBlobURL)
       .then((url) => {
         download(url, rename(file.name, type));
@@ -142,7 +182,7 @@ function App() {
       {
         state.audioBuffer || state.decoding ? (
           <div>
-            <h2 className="app-title">Audio Cutter</h2>
+            <h2 className="app-title">CountryRiddim.exe</h2>
 
             {
               state.decoding ? (
@@ -150,42 +190,63 @@ function App() {
                   DECODING...
                 </div>
               ) : (
-                <Player
-                  audioBuffer={state.audioBuffer!}
-                  blob={state.file!}
-                  paused={state.paused}
-                  startTime={state.startTime}
-                  endTime={state.endTime}
-                  currentTime={state.currentTime}
-                  onStartTimeChange={handleStartTimeChange}
-                  onEndTimeChange={handleEndTimeChange}
-                  onCurrentTimeChange={handleCurrentTimeChange}
-                  onEnd={handleEnd}
-                />
+                <div>
+                  <FilePicker className="ctrl-item" onPick={handleFileChange}>
+                    <Icon icon={musicIcon} />
+                  </FilePicker>
+                  <Player
+                    audioBuffer={state.audioBuffer!}
+                    blob={state.file!}
+                    paused={state.paused}
+                    startTime={state.startTime}
+                    endTime={state.endTime}
+                    currentTime={state.currentTime}
+                    onStartTimeChange={handleStartTimeChange}
+                    onEndTimeChange={handleEndTimeChange}
+                    onCurrentTimeChange={handleCurrentTimeChange}
+                    onEnd={handleEnd}
+                  />
+                </div>
               )
             }
 
             <div className="controllers">
-              <FilePicker className="ctrl-item" onPick={handleFileChange}>
-                <Icon icon={musicIcon} />
-              </FilePicker>
-
+              <div className="player-controls">
+                <button
+                  type="button"
+                  className="ctrl-item"
+                  title="Replay"
+                  onClick={handleReplayClick}
+                >
+                  <img src={replayImg} />
+                </button>
+                <button
+                  type="button"
+                  className="ctrl-item"
+                  title="Play/Pause"
+                  onClick={handlePlayPauseClick}
+                >
+                  {state.paused ?
+                    <img src={playImg} />
+                    :
+                    <img src={pauseImg} />
+                  }
+                </button>
+                <label>
+                  Start:
+                  <input
+                    type="number"
+                    value={state.startTime}
+                    step="0.01"
+                    min="0.00"
+                    max={state.audioBuffer?.duration}
+                    onChange={handleStartInputChange} />
+                </label>
+              </div>
               <button
-                type="button"
-                className="ctrl-item"
-                title="Play/Pause"
-                onClick={handlePlayPauseClick}
-              >
-                <Icon icon={state.paused ? playIcon : pauseIcon} />
-              </button>
-
-              <button
-                type="button"
-                className="ctrl-item"
-                title="Replay"
-                onClick={handleReplayClick}
-              >
-                <Icon icon={replayIcon} />
+                title="Submit"
+                onClick={handlePlayPauseClick}>
+                Done
               </button>
 
               <div className="dropdown list-wrap">

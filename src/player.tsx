@@ -29,8 +29,8 @@ function getClipRect(start: number, end: number) {
   return `rect(0, ${end}px, ${containerHeight}px, ${start}px)`;
 }
 
-const color1 = '#0cf';
-const color2 = '#1ad1ff';
+const color1 = '#e3bb15';
+const color2 = '#e3bb15';
 const gray1 = '#ddd';
 const gray2 = '#e3e3e3';
 
@@ -82,10 +82,12 @@ export default function Player({
 
   const handleDragStart = useCallback(({ x }: Pos) => {
     onStartTimeChange(clampTime(pos2Time(x)));
+    onCurrentTimeChange(clampTime(pos2Time(x) - 1));
   }, [clampTime, onStartTimeChange, pos2Time]);
 
   const handleDragEnd = useCallback(({ x }: Pos) => {
     onEndTimeChange(clampTime(pos2Time(x)));
+    onCurrentTimeChange(clampTime(pos2Time(x) - 1));
   }, [clampTime, onEndTimeChange, pos2Time]);
 
   const handleDragCurrent = useCallback(({ x }: Pos) => {
@@ -97,7 +99,7 @@ export default function Player({
     const { currentTime: time } = audioRef.current;
     if (time === currentTime) return;
     onCurrentTimeChange(time);
-    if (time >= endTime && currentTime < endTime) {
+    if (time >= startTime && currentTime < startTime) {
       onEnd();
     }
     currentTimeRef.current = time;
@@ -152,7 +154,7 @@ export default function Player({
       </div>
       <div
         className="clipper"
-        style={{ clip: getClipRect(start, end) }}
+        style={{ clip: getClipRect(0, start) }}
       >
         <Waver
           audioBuffer={audioBuffer}
@@ -163,10 +165,11 @@ export default function Player({
         />
       </div>
       <Dragger
+        className="slider"
         x={start}
         value={startTime}
-        onDrag={handleDragStart}
-      />
+        onDrag={handleDragStart}>
+      </Dragger>
       <Dragger
         className="drag-current"
         x={current}
@@ -175,17 +178,12 @@ export default function Player({
       >
         <div className="cursor-current">
           <span className="num">{currentTimeFormatted[0]}</span>
-          &apos;
+          :
           <span className="num">{currentTimeFormatted[1]}</span>
           .
           <span className="num">{currentTimeFormatted[2].toString().padStart(2, '0')}</span>
         </div>
       </Dragger>
-      <Dragger
-        x={end}
-        value={endTime}
-        onDrag={handleDragEnd}
-      />
     </div>
   );
 }

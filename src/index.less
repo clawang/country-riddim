@@ -1,3 +1,6 @@
+@windows: #c0c0c0;
+@cursorColor: #ff0000;
+
 html, body {
   height: 100%;
 }
@@ -26,6 +29,7 @@ body {
   width: 1080px;
   margin: 0 auto;
   padding: 40px;
+  background: @windows;
 }
 
 .app-title {
@@ -43,7 +47,8 @@ body {
   margin: 0 auto;
   height: 160px;
   display: block;
-  box-shadow: 0 0 30px rgba(0,0,0,.1);
+  background: #fff;
+  border: 2px inset #fffafa;
 
   .wave-canvas {
     position: absolute;
@@ -64,8 +69,7 @@ body {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: #999;
-  cursor: col-resize;
+  background: #000;
 
   &::after {
     content: '';
@@ -79,10 +83,24 @@ body {
   &:hover {
     background: #333;
   }
+
+  .slider-wrapper {
+    width: 30px;
+    height: 30px;
+    transform: translate3D(-50%, -10px, 0);
+    text-align: center;
+    cursor: col-resize;
+  }
+
+  img {
+    pointer-events: none;
+    margin-left: 1px;
+  }
 }
 
 .drag-current {
-  background: #0cf;
+  background: @cursorColor;
+  cursor: col-resize;
 }
 
 .landing {
@@ -99,7 +117,7 @@ body {
 }
 
 .controllers {
-  display: flex;
+  // display: flex;
   margin-top: 10px;
 
   .seconds {
@@ -109,6 +127,17 @@ body {
     display: inline-block;
     overflow: hidden;
     color: #aaa;
+  }
+}
+
+.player-controls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+  .icon {
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -169,17 +198,24 @@ body {
   font-size: 16px;
   text-align: center;
   color: #999;
-  padding: 10px;
   margin-right: 10px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.1);
   cursor: pointer;
+  border: 2px outset #fff;
 
   &:hover {
-    box-shadow: 0 0 20px rgba(0,0,0,0.16);
+    // box-shadow: 0 0 20px rgba(0,0,0,0.16);
+  }
+
+  &:active {
+    border: 2px inset #fffafa;
   }
 
   .icon {
     display: block;
+  }
+
+  img {
+    width: 20px;
   }
 }
 
@@ -238,11 +274,9 @@ body {
 }
 
 .cursor-current {
-  @cursorColor: #0cf;
-
   position: absolute;
   font-size: 12px;
-  top: -22px;
+  bottom: -22px;
   padding: 1px 3px;
   text-align: center;
   color: #fff;
@@ -257,8 +291,8 @@ body {
     content: '';
     position: absolute;
     border: 5px solid transparent;
-    border-top-color: #0cf;
-    bottom: -9px;
+    border-bottom-color: @cursorColor;
+    top: -9px;
     left: 50%;
     margin-left: -5px;
   }

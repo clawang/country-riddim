@@ -35,3 +35,37 @@ export async function decodeAudioBuffer(blob: Blob) {
 
   return audioBuffer;
 }
+
+export async function fetchAudioBuffer(file: RequestInfo | URL) {
+  const audioContext = new AudioContext();
+
+  try {
+    const response = await fetch(file);
+    console.log(response);
+    const arrayBuffer = await response.arrayBuffer();
+    return audioContext.decodeAudioData(arrayBuffer);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export function concatAudioBuffer(buffers: AudioBuffer[]): AudioBuffer {
+  window.AudioContext = window.AudioContext || (window as any).webkitAudioContext || (window as any).mozAudioContext;
+  const context = new AudioContext();
+  const output = context.createBuffer(
+    Math.max(...buffers.map((buffer) => buffer.numberOfChannels)),
+    buffers.map((buffer) => buffer.length).reduce((a, b) => a + b, 0),
+    context.sampleRate
+  );
+  let offset = 0;
+
+  buffers.forEach((buffer) => {
+    for (let channelNumber = 0; channelNumber < buffer.numberOfChannels; channelNumber++) {
+      output.getChannelData(channelNumber).set(buffer.getChannelData(channelNumber), offset);
+    }
+
+    offset += buffer.length;
+  });
+
+  return output;
+}
