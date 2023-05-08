@@ -54,7 +54,13 @@ export const rename = (filename: string, ext: string, stamp?: string) => `${file
  * format seconds to [minutes, integer, decimal(2)]
  */
 export const formatSeconds = (seconds: number) => [
-  Math.floor(seconds / 60),
-  Math.floor(seconds % 60),
-  Math.round((seconds % 1) * 100),
+  formatDigit(Math.floor(seconds / 60)),
+  formatDigit(Math.floor(seconds % 60)),
+  formatDigit(Math.round((seconds % 1) * 100)),
 ];
+
+const formatDigit = (num: number) => {
+  let str = String(num);
+  if (str.length < 2) str = "0".concat(str);
+  return str;
+}

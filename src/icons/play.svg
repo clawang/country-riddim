@@ -1,4 +1,8 @@
-<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-  <path d="M0 0h24v24H0z" fill="none"/>
-  <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="20.89" y="22" width="11.56" height="52"/>
+  <rect x="67.11" y="45.11" width="11.56" height="5.78"/>
+  <rect x="55.56" y="39.33" width="11.56" height="17.33"/>
+  <rect x="44" y="33.56" width="11.56" height="28.89"/>
+  <rect x="32.44" y="27.78" width="11.56" height="40.44"/>
 </svg>

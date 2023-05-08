@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState
 } from 'react';
 import getPeaks from './peaks';
 
@@ -26,13 +27,18 @@ function AudioWave({
   audioBuffer,
   className,
 }: AudioWaveProps) {
-  const deviceWidth = width * dpr;
+  const [deviceWidth, setDeviceWidth] = useState(width * dpr);
 
   const peaks = useMemo(
     () => getPeaks(Math.floor(deviceWidth), audioBuffer.getChannelData(0)),
     [audioBuffer, deviceWidth],
   );
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    setDeviceWidth(width * dpr);
+    paint();
+  }, [width]);
 
   const paint = () => {
     const ctx = canvasRef.current?.getContext('2d');
@@ -42,6 +48,8 @@ function AudioWave({
 
     ctx.lineWidth = 1;
     ctx.clearRect(0, 0, deviceWidth, height * dpr);
+    ctx.fillStyle = "rgb(0,0,0)";
+    ctx.fillRect(0, 0, deviceWidth, height * dpr);
 
     for (let i = 0; i < count; i += 1) {
       const min = peaks[0][i];

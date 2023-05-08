@@ -3,24 +3,20 @@ import ReactDOM from 'react-dom';
 import Player from './player';
 import FilePicker from './file';
 import Icon from './icon';
+import Output from './output';
+import Window from './window';
 import {
   isAudio, readBlobURL, download, rename,
 } from './utils';
 import { decodeAudioBuffer, sliceAudioBuffer, fetchAudioBuffer, concatAudioBuffer } from './audio-helper';
 import encode from './worker-client';
 import './index.less';
-import {
-  downloadIcon,
-  musicIcon,
-  pauseIcon,
-  playIcon,
-  replayIcon,
-  spinIcon,
-} from './icons';
-import playImg from './icons/play.png';
-import pauseImg from './icons/pause.png';
-import replayImg from './icons/replay.png';
+import playIcon from './icons/play.svg';
+import pauseIcon from './icons/pause.svg';
+import replayIcon from './icons/replay.svg';
+import forwardIcon from './icons/forward.svg';
 import drop from './country-riddim.mp3';
+import logo from './icons/logo.png';
 import { useClassicState } from './hooks';
 import { SUpportedFormat } from './types';
 
@@ -30,21 +26,23 @@ function App() {
     decoding: boolean;
     audioBuffer: AudioBuffer | null;
     countryRiddim: AudioBuffer | null;
+    outputUrl: string | null,
     paused: boolean;
     startTime: number;
-    endTime: number;
     currentTime: number;
     processing: boolean;
+    start: boolean;
   }>({
     file: null,
     decoding: false,
     audioBuffer: null,
     countryRiddim: null,
+    outputUrl: null,
     paused: true,
-    startTime: 0,
-    endTime: Infinity,
+    startTime: 10,
     currentTime: 0,
     processing: false,
+    start: false,
   });
 
   React.useEffect(() => {
@@ -86,12 +84,6 @@ function App() {
     });
   };
 
-  const handleEndTimeChange = (time: number) => {
-    setState({
-      endTime: time,
-    });
-  };
-
   const handleCurrentTimeChange = (time: number) => {
     setState({
       currentTime: time,
@@ -117,18 +109,17 @@ function App() {
     });
   };
 
+  const handleForwardClick = () => {
+    setState({
+      currentTime: state.startTime - 1,
+      paused: false,
+    });
+  };
+
   const handleStartInputChange = (evt) => {
     const time = Number(evt.target?.value);
     setState({
       startTime: time,
-      currentTime: time-1,
-    });
-  };
-
-  const handleEndInputChange = (evt) => {
-    const time = Number(evt.target?.value);
-    setState({
-      endTime: time,
       currentTime: time-1,
     });
   };
@@ -138,23 +129,22 @@ function App() {
       startTime, endTime, audioBuffer, file,
     } = state;
     if (!audioBuffer || !file) return;
+    if (startTime <= 0) {
+      alert("You need to select part of the song!");
+      return;
+    }
 
-    const { length, duration } = audioBuffer;
+    const { length, duration, sampleRate } = audioBuffer;
 
-    const audioSlices: AudioBuffer[] = new Array(3);
+    const audioSlices: AudioBuffer[] = new Array(2);
 
     audioSlices[0] = sliceAudioBuffer(
       audioBuffer,
       0,
-      Math.floor(length * startTime / duration),
+      Math.floor(startTime * sampleRate),
     );
 
     audioSlices[1] = state.countryRiddim!;
-
-    audioSlices[2] = sliceAudioBuffer(
-      audioBuffer,
-      Math.floor(length * endTime / duration),
-    );
 
     const audioResult = concatAudioBuffer(audioSlices);
 
@@ -165,7 +155,11 @@ function App() {
     encode(audioResult, type)
       .then(readBlobURL)
       .then((url) => {
-        download(url, rename(file.name, type));
+        console.log(url);
+        setState({
+          outputUrl: url,
+        });
+        // download(url, rename(file.name, type));
       })
       .catch((e) => console.error(e))
       .then(() => {
@@ -177,161 +171,151 @@ function App() {
 
   const displaySeconds = (seconds: number) => `${seconds.toFixed(2)}s`;
 
+  const reset = () => {
+    setState({
+      decoding: false,
+      audioBuffer: null,
+      processing: false,
+      outputUrl: null,
+    });
+  }
+
   return (
     <div className="container">
       {
         state.audioBuffer || state.decoding ? (
-          <div>
-            <h2 className="app-title">CountryRiddim.exe</h2>
-
-            {
-              state.decoding ? (
-                <div className="player player-landing">
-                  DECODING...
-                </div>
-              ) : (
-                <div>
-                  <FilePicker className="ctrl-item" onPick={handleFileChange}>
-                    <Icon icon={musicIcon} />
-                  </FilePicker>
-                  <Player
-                    audioBuffer={state.audioBuffer!}
-                    blob={state.file!}
-                    paused={state.paused}
-                    startTime={state.startTime}
-                    endTime={state.endTime}
-                    currentTime={state.currentTime}
-                    onStartTimeChange={handleStartTimeChange}
-                    onEndTimeChange={handleEndTimeChange}
-                    onCurrentTimeChange={handleCurrentTimeChange}
-                    onEnd={handleEnd}
-                  />
-                </div>
-              )
-            }
-
-            <div className="controllers">
-              <div className="player-controls">
-                <button
-                  type="button"
-                  className="ctrl-item"
-                  title="Replay"
-                  onClick={handleReplayClick}
-                >
-                  <img src={replayImg} />
-                </button>
-                <button
-                  type="button"
-                  className="ctrl-item"
-                  title="Play/Pause"
-                  onClick={handlePlayPauseClick}
-                >
-                  {state.paused ?
-                    <img src={playImg} />
-                    :
-                    <img src={pauseImg} />
-                  }
-                </button>
-                <label>
-                  Start:
-                  <input
-                    type="number"
-                    value={state.startTime}
-                    step="0.01"
-                    min="0.00"
-                    max={state.audioBuffer?.duration}
-                    onChange={handleStartInputChange} />
-                </label>
-              </div>
-              <button
-                title="Submit"
-                onClick={handlePlayPauseClick}>
-                Done
-              </button>
-
-              <div className="dropdown list-wrap">
-                <button
-                  type="button"
-                  className="ctrl-item"
-                >
-                  <Icon icon={state.processing ? spinIcon : downloadIcon} />
-                </button>
-                {
-                  !state.processing && (
-                    <ul className="list">
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => handleEncode('wav')}
-                        >
-                          Wav
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => handleEncode('mp3')}
-                          data-type="mp3"
-                        >
-                          MP3
-                        </button>
-                      </li>
-                    </ul>
-                  )
-                }
-              </div>
-
+          <>
+            <Window id="audio-editor" title="Audio Editor">
               {
-                Number.isFinite(state.endTime)
-                && (
-                <span className="seconds">
-                  Select
-                  {' '}
-                  <span className="seconds-range">
-                    {
-                    displaySeconds(state.endTime - state.startTime)
-                  }
-                  </span>
-                  {' '}
-                  of
-                  {' '}
-                  <span className="seconds-total">
-                    {
-                    displaySeconds(state.audioBuffer?.duration ?? 0)
-                  }
-                  </span>
-                  {' '}
-                  (from
-                  {' '}
-                  <span className="seconds-start">
-                    {
-                    displaySeconds(state.startTime)
-                  }
-                  </span>
-                  {' '}
-                  to
-                  {' '}
-                  <span className="seconds-end">
-                    {
-                    displaySeconds(state.endTime)
-                  }
-                  </span>
-                  )
-                </span>
+                state.decoding ? (
+                  <div className="player-loading-wrapper">
+                    <div className="loading-wrapper">
+                      <div className="loading">
+                        <div className="loading-bar"></div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                  <div className="player-wrapper">
+                    <p>Choose where you want the drop to start.</p>
+                    <Player
+                      audioBuffer={state.audioBuffer!}
+                      blob={state.file!}
+                      paused={state.paused}
+                      startTime={state.startTime}
+                      currentTime={state.currentTime}
+                      onStartTimeChange={handleStartTimeChange}
+                      onCurrentTimeChange={handleCurrentTimeChange}
+                      onEnd={handleEnd}
+                    />
+                  </div>
+                  <div className="controllers">
+                    <div className="player-controls">
+                      <button
+                        type="button"
+                        className="ctrl-item"
+                        title="Replay"
+                        onClick={handleReplayClick}
+                      >
+                        <Icon icon={replayIcon} />
+                      </button>
+                      <button
+                        type="button"
+                        className="ctrl-item"
+                        title="Play/Pause"
+                        onClick={handlePlayPauseClick}
+                      >
+                        <Icon icon={state.paused ? playIcon : pauseIcon} />
+                      </button>
+                      <button
+                        type="button"
+                        className="ctrl-item"
+                        title="Forward"
+                        onClick={handleForwardClick}
+                      >
+                        <Icon icon={forwardIcon} />
+                      </button>
+                      <label id="timestamp">
+                        Time:
+                        <input
+                          type="number"
+                          value={state.startTime}
+                          step="0.01"
+                          min="0.00"
+                          max={state.audioBuffer?.duration}
+                          onChange={handleStartInputChange} />
+                      </label>
+                    </div>
+                    <div className="button-wrapper">
+                      <button
+                        title="Back"
+                        onClick={reset}>
+                        Back
+                      </button>
+                      <button
+                        title="Submit"
+                        onClick={() => handleEncode('mp3')}>
+                        Done
+                      </button>
+                    </div>
+                  </div>
+                </>
                 )
               }
-            </div>
-          </div>
+            </Window>
+            {
+            (state.processing || state.outputUrl) ?
+              <Window id="audio-output" title="Output">
+                {
+                  !state.processing ? (
+                    <>
+                      <Output url={state.outputUrl} />
+                      <div className="dropdown list-wrap">
+                        <button
+                          type="button"
+                          onClick={() => download(state.outputUrl!, rename(state.file!.name, 'mp3'))}
+                        >
+                          Download
+                        </button>
+                      </div>
+                    </>
+                  )
+                  :
+                  <div className="loading-wrapper">
+                    <div className="loading">
+                      <div className="loading-bar"></div>
+                    </div>
+                  </div>
+                }
+                
+              </Window>
+              :
+              <></>
+            }
+          </>
         ) : (
-          <div className="landing">
-            <h2>Audio Cutter</h2>
-            <FilePicker onPick={handleFileChange}>
-              <div className="file-main">
-                <Icon icon={musicIcon} />
-                Select music file
+          <Window id="audio-upload" title="Upload" startup={true}>
+            <img src={logo} />
+            {state.start ?
+              <FilePicker onPick={handleFileChange}>
+                <div className="file-main">
+                  <Icon icon={musicIcon} />
+                  Select music file
+                </div>
+              </FilePicker>
+              :
+              <div className="start-screen">
+                <div className="start-screen-credits">
+                  <p>App by <a href="https://linktr.ee/claireyw" target="_blank">Claire Wang</a></p>
+                  <p>Song by <a href="https://linktr.ee/holholhol" target="_blank">Hol!</a></p>
+                  <p>Inspired by Four Tet</p>
+                </div>
+                <p>Not affiliated with Hol! or Four Tet.</p>
+                <button onClick={() => setState({start: true})}>Start</button>
               </div>
-            </FilePicker>
-          </div>
+            }
+          </Window>
         )
       }
     </div>
