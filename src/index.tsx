@@ -15,6 +15,7 @@ import playIcon from './icons/play.svg';
 import pauseIcon from './icons/pause.svg';
 import replayIcon from './icons/replay.svg';
 import forwardIcon from './icons/forward.svg';
+import musicIcon from './icons/music.svg';
 import drop from './country-riddim.mp3';
 import logo from './icons/logo.png';
 import { useClassicState } from './hooks';
