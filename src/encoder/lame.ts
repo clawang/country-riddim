@@ -2,7 +2,7 @@ import { Encoder } from '../types';
 
 const vendorPrefix = process.env.IS_DEV
   ? '/vendor/'
-  : '/audio-cutter/vendor/';
+  : '/country-riddim/vendor/';
 
 Object.assign(globalThis, {
   Mp3LameEncoderConfig: {
