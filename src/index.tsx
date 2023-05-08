@@ -301,7 +301,7 @@ function App() {
                 <FilePicker onPick={handleFileChange}>
                   <div className="file-main">
                     <Icon icon={musicIcon} />
-                    Select music file
+                    Upload music file
                   </div>
                 </FilePicker>
                 <div className="button-wrapper">
