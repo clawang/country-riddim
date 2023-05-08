@@ -61,14 +61,12 @@ function Output({
       
       useEffect(() => {
         const audio = audioRef.current;
-        console.log(currentTime);
         if (!audio?.src) return;
     
         if (currentTimeRef.current !== currentTime) {
           audio.currentTime = currentTime;
           currentTimeRef.current = currentTime;
           setCurrentTimeFormatted(formatSeconds(currentTime));
-          console.log(currentTime * math.widthDurationRatio);
           setState({...state, x: currentTime * math.widthDurationRatio});
         }
       }, [currentTime]);
@@ -144,7 +142,6 @@ function Output({
                             <Icon icon={fastForwardIcon} />
                         </button>
                         <button onClick={() => {
-                            console.log(math.duration);
                             setCurrentTime(math.duration);
                             }}>
                             <Icon icon={forwardIcon} />

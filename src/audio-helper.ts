@@ -41,7 +41,6 @@ export async function fetchAudioBuffer(file: RequestInfo | URL) {
 
   try {
     const response = await fetch(file);
-    console.log(response);
     const arrayBuffer = await response.arrayBuffer();
     return audioContext.decodeAudioData(arrayBuffer);
   } catch (error) {

@@ -75,7 +75,6 @@ function App() {
       audioBuffer,
       startTime: 0,
       currentTime: 0,
-      endTime: audioBuffer.duration / 2,
     });
   };
 
@@ -127,7 +126,7 @@ function App() {
 
   const handleEncode = (type: SUpportedFormat) => {
     const {
-      startTime, endTime, audioBuffer, file,
+      startTime, audioBuffer, file,
     } = state;
     if (!audioBuffer || !file) return;
     if (startTime <= 0) {
@@ -156,7 +155,6 @@ function App() {
     encode(audioResult, type)
       .then(readBlobURL)
       .then((url) => {
-        console.log(url);
         setState({
           outputUrl: url,
         });
@@ -299,12 +297,17 @@ function App() {
           <Window id="audio-upload" title="Upload" startup={true}>
             <img src={logo} />
             {state.start ?
-              <FilePicker onPick={handleFileChange}>
-                <div className="file-main">
-                  <Icon icon={musicIcon} />
-                  Select music file
+              <>
+                <FilePicker onPick={handleFileChange}>
+                  <div className="file-main">
+                    <Icon icon={musicIcon} />
+                    Select music file
+                  </div>
+                </FilePicker>
+                <div className="button-wrapper">
+                  <button onClick={() => setState({start: false})}>Back</button>
                 </div>
-              </FilePicker>
+              </>
               :
               <div className="start-screen">
                 <p>Add a country riddim drop to any song!</p>
