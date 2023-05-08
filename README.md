@@ -1,15 +1,8 @@
-# audio-cutter
-✄Cut audio using HTML + JavaScript.
+# CountryRiddim.exe
+Add a country riddim drop to any song!
 
-![screenshot](https://user-images.githubusercontent.com/4006436/29242230-cc55a19a-7fbb-11e7-8cda-b92499a79b45.png)
+App by ([Claire Wang][https://linktr.ee/claireyw])
+Song by ([Hol!][https://linktr.ee/holholhol])
+Inspired by Four Tet
 
-online https://meowtec.github.io/audio-cutter/dist
-
-### Platforms
-
- - latest Chrome
-
-### Exports
-
-- wav
-- mp3 ([using Mp3LameEncoder.js](https://github.com/higuma/mp3-lame-encoder-js))
+Not affiliated with Hol! or Four Tet.

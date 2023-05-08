@@ -306,6 +306,7 @@ function App() {
               </FilePicker>
               :
               <div className="start-screen">
+                <p>Add a country riddim drop to any song!</p>
                 <div className="start-screen-credits">
                   <p>App by <a href="https://linktr.ee/claireyw" target="_blank">Claire Wang</a></p>
                   <p>Song by <a href="https://linktr.ee/holholhol" target="_blank">Hol!</a></p>
