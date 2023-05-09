@@ -65,14 +65,15 @@ export default function Player({
   
 
   useEffect(() => {
-    function handleResize() {
-      if (playerRef.current && playerRef.current!.offsetWidth < 800) {
-        setContainerWidth(playerRef.current!.offsetWidth);
-      }
-    }
-
+    handleResize();
     window.addEventListener('resize', handleResize);
-  });
+  }, [setContainerWidth]);
+
+  const handleResize = () => {
+    if (playerRef.current && playerRef.current!.offsetWidth < 800) {
+      setContainerWidth(playerRef.current!.offsetWidth);
+    }
+  }
 
   const pos2Time = useCallback(
     (pos: number) => pos / widthDurationRatio,
