@@ -41,8 +41,9 @@ a {
   color: black;
 }
 
-input[type="number"] {
+input[type="text"] {
   border: 2px inset #d8d6d5;
+  font-family: @defaultFont;
 }
 
 :focus:not(:focus-visible) {
@@ -185,7 +186,7 @@ input[type="number"] {
     text-align: center;
 
     .start-screen-credits {
-      margin: 10px 0 20px;
+      margin: 20px 0;
     }
 
     p {
@@ -289,8 +290,12 @@ input[type="number"] {
 
 .button-wrapper {
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
   padding: 10px;
+
+  button:first-of-type {
+    margin-right: 5px;
+  }
 }
 
 #audio-upload .button-wrapper {
@@ -313,8 +318,12 @@ input[type="number"] {
 
 .player-controls {
   width: 100%;
-  display: flex;
-  justify-content: center;
+
+  .player-controls-top {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
 
   .icon {
     width: 15px;
@@ -323,12 +332,22 @@ input[type="number"] {
 }
 
 #timestamp {
-  position: absolute;
-  left: 10px;
+  display: flex;
+  align-items: stretch;
+  flex-direction: row;
+  justify-content: center;
+  margin-top: 10px;
 
   input {
-    width: 60px;
-    margin-left: 10px;
+    font-size: 14px;
+    background-color: #c3c7cb;
+    padding: 3px;
+    width: 105px;
+    margin: 00 4px;
+  }
+
+  button {
+    padding: 0;
   }
 }
 
@@ -417,6 +436,10 @@ input[type="number"] {
 
   &:active {
     border: 2px inset #fffafa;
+  }
+
+  &:last-of-type {
+    margin: 0;
   }
 
   .icon {
@@ -531,9 +554,10 @@ input[type="number"] {
   }
 
   .dropdown {
-    position: absolute;
-    right: 20px;
-    bottom: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    padding: 0 20px;
   }
 }
 

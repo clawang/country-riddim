@@ -62,12 +62,6 @@ export default function Player({
   const audioRef = useRef<HTMLAudioElement>(null);
   const playerRef = useRef<HTMLDivElement>(null);
   const currentTimeRef = useRef<number>();
-  
-
-  useEffect(() => {
-    handleResize();
-    window.addEventListener('resize', handleResize);
-  }, [setContainerWidth]);
 
   const handleResize = () => {
     if (playerRef.current && playerRef.current!.offsetWidth < 800) {
@@ -88,11 +82,17 @@ export default function Player({
   const start = time2pos(startTime);
   const current = time2pos(currentTime);
 
+  useEffect(() => {
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    onStartTimeChange(audioBuffer.duration/2);
+  }, [setContainerWidth]);
+
   const currentTimeFormatted = formatSeconds(currentTime);
 
   const handleDragStart = useCallback(({ x }: Pos) => {
     onStartTimeChange(clampTime(pos2Time(x)));
-    onCurrentTimeChange(clampTime(pos2Time(x) - 1));
+    // onCurrentTimeChange(clampTime(pos2Time(x) - 1));
   }, [clampTime, onStartTimeChange, pos2Time]);
 
   const handleDragCurrent = useCallback(({ x }: Pos) => {

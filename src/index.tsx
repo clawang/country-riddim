@@ -11,11 +11,14 @@ import {
 import { decodeAudioBuffer, sliceAudioBuffer, fetchAudioBuffer, concatAudioBuffer } from './audio-helper';
 import encode from './worker-client';
 import './index.less';
+import { formatSeconds } from './utils';
 import playIcon from './icons/play.svg';
 import pauseIcon from './icons/pause.svg';
 import replayIcon from './icons/replay.svg';
 import forwardIcon from './icons/forward.svg';
 import musicIcon from './icons/music.svg';
+import rewindIcon from './icons/rewind.svg';
+import fastForwardIcon from './icons/fast-forward.svg';
 import drop from './country-riddim.mp3';
 import logo from './icons/logo.png';
 import { useClassicState } from './hooks';
@@ -33,6 +36,7 @@ function App() {
     currentTime: number;
     processing: boolean;
     start: boolean;
+    displayTime: string;
   }>({
     file: null,
     decoding: false,
@@ -44,6 +48,7 @@ function App() {
     currentTime: 0,
     processing: false,
     start: false,
+    displayTime: "Drop Time: 00:00 m:s",
   });
 
   React.useEffect(() => {
@@ -53,6 +58,15 @@ function App() {
       });
     });
   }, [setState]);
+
+  React.useEffect(() => {
+    const time = formatSeconds(state.startTime);
+    let str = "Drop time: ";
+    str = str.concat(time[0])
+    str = str.concat(":").concat(time[1]);
+    str = str.concat(".").concat(time[2]);
+    setState({displayTime: str});
+  }, [state.startTime]);
 
   const handleFileChange = async (file: File) => {
     if (!isAudio(file)) {
@@ -211,40 +225,46 @@ function App() {
                   </div>
                   <div className="controllers">
                     <div className="player-controls">
-                      <button
-                        type="button"
-                        className="ctrl-item"
-                        title="Replay"
-                        onClick={handleReplayClick}
-                      >
-                        <Icon icon={replayIcon} />
-                      </button>
-                      <button
-                        type="button"
-                        className="ctrl-item"
-                        title="Play/Pause"
-                        onClick={handlePlayPauseClick}
-                      >
-                        <Icon icon={state.paused ? playIcon : pauseIcon} />
-                      </button>
-                      <button
-                        type="button"
-                        className="ctrl-item"
-                        title="Forward"
-                        onClick={handleForwardClick}
-                      >
-                        <Icon icon={forwardIcon} />
-                      </button>
-                      <label id="timestamp">
-                        Time:
+                      <div className="player-controls-top">
+                        <button
+                          type="button"
+                          className="ctrl-item"
+                          title="Replay"
+                          onClick={handleReplayClick}
+                        >
+                          <Icon icon={replayIcon} />
+                        </button>
+                        <button
+                          type="button"
+                          className="ctrl-item"
+                          title="Play/Pause"
+                          onClick={handlePlayPauseClick}
+                        >
+                          <Icon icon={state.paused ? playIcon : pauseIcon} />
+                        </button>
+                        <button
+                          type="button"
+                          className="ctrl-item"
+                          title="Forward"
+                          onClick={handleForwardClick}
+                        >
+                          <Icon icon={forwardIcon} />
+                        </button>
+                      </div>
+                      <div id="timestamp">
+                        <button onClick={() => setState({startTime: state.startTime-0.1})}>
+                            <Icon icon={rewindIcon} />
+                        </button>
                         <input
-                          type="number"
-                          value={state.startTime}
-                          step="0.01"
-                          min="0.00"
-                          max={state.audioBuffer?.duration}
+                          type="text"
+                          id="drop-time"
+                          readOnly={true}
+                          value={state.displayTime}
                           onChange={handleStartInputChange} />
-                      </label>
+                          <button onClick={() => setState({startTime: state.startTime+0.1})}>
+                            <Icon icon={fastForwardIcon} />
+                          </button>
+                      </div>
                     </div>
                     <div className="button-wrapper">
                       <button
@@ -311,6 +331,7 @@ function App() {
               :
               <div className="start-screen">
                 <p>Add a country riddim drop to any song!</p>
+                <p>For best results, use on desktop only.</p>
                 <div className="start-screen-credits">
                   <p>App by <a href="https://linktr.ee/claireyw" target="_blank">Claire Wang</a></p>
                   <p>Song by <a href="https://linktr.ee/holholhol" target="_blank">Hol!</a></p>
