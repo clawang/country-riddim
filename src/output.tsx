@@ -19,11 +19,13 @@ import fastForwardIcon from './icons/fast-forward.svg';
 interface OutputProps {
   className?: string;
   url: string;
+  dropTime: number;
 }
 
 function Output({
   className,
   url,
+  dropTime,
 }: OutputProps) {
     const [paused, setPaused] = useState(true);
     const [state, setState] = useState({x: 0, y: 0});
@@ -79,6 +81,11 @@ function Output({
         currentTimeRef.current = time;
         setCurrentTimeFormatted(formatSeconds(time));
         setState({...state, x: time * math.widthDurationRatio});
+        if (time >= dropTime) {
+            document.getElementById('main')?.classList.add('fourtet');
+        } else {
+            document.getElementById('main')?.classList.remove('fourtet');
+        }
       };
 
       const handleMouseDown = (e0: React.MouseEvent) => {
@@ -86,11 +93,11 @@ function Output({
     
         const handleMouseMove = (e: MouseEvent) => {
             const xPos = Math.min(Math.max(e.screenX - screenX + state.x, 0), math.containerWidth);
-          setState({
-            x: xPos,
-            y: e.screenY - screenY + state.y,
-          });
-          const time = xPos / math.widthDurationRatio;
+            setState({
+                x: xPos,
+                y: e.screenY - screenY + state.y,
+            });
+            const time = xPos / math.widthDurationRatio;
             setCurrentTime(time);
         };
     

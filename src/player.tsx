@@ -85,7 +85,9 @@ export default function Player({
   useEffect(() => {
     handleResize();
     window.addEventListener('resize', handleResize);
-    onStartTimeChange(audioBuffer.duration/2);
+    if (startTime <= 0) {
+      onStartTimeChange(audioBuffer.duration/2);
+    }
   }, [setContainerWidth]);
 
   const currentTimeFormatted = formatSeconds(currentTime);

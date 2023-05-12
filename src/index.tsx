@@ -23,6 +23,7 @@ import drop from './country-riddim.mp3';
 import logo from './icons/logo.png';
 import { useClassicState } from './hooks';
 import { SUpportedFormat } from './types';
+import output from './output';
 
 function App() {
   const [state, setState] = useClassicState<{
@@ -37,6 +38,7 @@ function App() {
     processing: boolean;
     start: boolean;
     displayTime: string;
+    outputScreen: boolean;
   }>({
     file: null,
     decoding: false,
@@ -44,11 +46,12 @@ function App() {
     countryRiddim: null,
     outputUrl: null,
     paused: true,
-    startTime: 10,
+    startTime: 0,
     currentTime: 0,
     processing: false,
     start: false,
     displayTime: "Drop Time: 00:00 m:s",
+    outputScreen: false,
   });
 
   React.useEffect(() => {
@@ -67,6 +70,12 @@ function App() {
     str = str.concat(".").concat(time[2]);
     setState({displayTime: str});
   }, [state.startTime]);
+
+  React.useEffect(() => {
+    if (!state.outputScreen) {
+      document.getElementById('main')?.classList.remove('fourtet');
+    }
+  }, [state.outputScreen]);
 
   const handleFileChange = async (file: File) => {
     if (!isAudio(file)) {
@@ -130,14 +139,6 @@ function App() {
     });
   };
 
-  const handleStartInputChange = (evt) => {
-    const time = Number(evt.target?.value);
-    setState({
-      startTime: time,
-      currentTime: time-1,
-    });
-  };
-
   const handleEncode = (type: SUpportedFormat) => {
     const {
       startTime, audioBuffer, file,
@@ -164,6 +165,7 @@ function App() {
 
     setState({
       processing: true,
+      outputScreen: true,
     });
 
     encode(audioResult, type)
@@ -172,7 +174,6 @@ function App() {
         setState({
           outputUrl: url,
         });
-        // download(url, rename(file.name, type));
       })
       .catch((e) => console.error(e))
       .then(() => {
@@ -197,100 +198,104 @@ function App() {
     <div className="container">
       {
         state.audioBuffer || state.decoding ? (
-          <>
-            <Window id="audio-editor" title="Audio Editor">
-              {
-                state.decoding ? (
-                  <div className="player-loading-wrapper">
-                    <div className="loading-wrapper">
-                      <div className="loading">
-                        <div className="loading-bar"></div>
+          !state.outputScreen ? (
+              <Window id="audio-editor" title="Audio Editor">
+                {
+                  state.decoding ? (
+                    <div className="player-loading-wrapper">
+                      <div className="loading-wrapper">
+                        <div className="loading">
+                          <div className="loading-bar"></div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <>
-                  <div className="player-wrapper">
-                    <p>Choose where you want the drop to start.</p>
-                    <Player
-                      audioBuffer={state.audioBuffer!}
-                      blob={state.file!}
-                      paused={state.paused}
-                      startTime={state.startTime}
-                      currentTime={state.currentTime}
-                      onStartTimeChange={handleStartTimeChange}
-                      onCurrentTimeChange={handleCurrentTimeChange}
-                      onEnd={handleEnd}
-                    />
-                  </div>
-                  <div className="controllers">
-                    <div className="player-controls">
-                      <div className="player-controls-top">
-                        <button
-                          type="button"
-                          className="ctrl-item"
-                          title="Replay"
-                          onClick={handleReplayClick}
-                        >
-                          <Icon icon={replayIcon} />
-                        </button>
-                        <button
-                          type="button"
-                          className="ctrl-item"
-                          title="Play/Pause"
-                          onClick={handlePlayPauseClick}
-                        >
-                          <Icon icon={state.paused ? playIcon : pauseIcon} />
-                        </button>
-                        <button
-                          type="button"
-                          className="ctrl-item"
-                          title="Forward"
-                          onClick={handleForwardClick}
-                        >
-                          <Icon icon={forwardIcon} />
-                        </button>
-                      </div>
-                      <div id="timestamp">
-                        <button onClick={() => setState({startTime: state.startTime-0.1})}>
-                            <Icon icon={rewindIcon} />
-                        </button>
-                        <input
-                          type="text"
-                          id="drop-time"
-                          readOnly={true}
-                          value={state.displayTime}
-                          onChange={handleStartInputChange} />
-                          <button onClick={() => setState({startTime: state.startTime+0.1})}>
-                            <Icon icon={fastForwardIcon} />
+                  ) : (
+                    <>
+                    <div className="player-wrapper">
+                      <p>Choose where you want the drop to start.</p>
+                      <Player
+                        audioBuffer={state.audioBuffer!}
+                        blob={state.file!}
+                        paused={state.paused}
+                        startTime={state.startTime}
+                        currentTime={state.currentTime}
+                        onStartTimeChange={handleStartTimeChange}
+                        onCurrentTimeChange={handleCurrentTimeChange}
+                        onEnd={handleEnd}
+                      />
+                    </div>
+                    <div className="controllers">
+                      <div className="player-controls">
+                        <div className="player-controls-top">
+                          <button
+                            type="button"
+                            className="ctrl-item"
+                            title="Replay"
+                            onClick={handleReplayClick}
+                          >
+                            <Icon icon={replayIcon} />
                           </button>
+                          <button
+                            type="button"
+                            className="ctrl-item"
+                            title="Play/Pause"
+                            onClick={handlePlayPauseClick}
+                          >
+                            <Icon icon={state.paused ? playIcon : pauseIcon} />
+                          </button>
+                          <button
+                            type="button"
+                            className="ctrl-item"
+                            title="Forward"
+                            onClick={handleForwardClick}
+                          >
+                            <Icon icon={forwardIcon} />
+                          </button>
+                        </div>
+                        <div id="timestamp">
+                          <button onClick={() => setState({startTime: state.startTime-0.1})}>
+                              <Icon icon={rewindIcon} />
+                          </button>
+                          <input
+                            type="text"
+                            id="drop-time"
+                            readOnly={true}
+                            value={state.displayTime} />
+                            <button onClick={() => setState({startTime: state.startTime+0.1})}>
+                              <Icon icon={fastForwardIcon} />
+                            </button>
+                        </div>
+                      </div>
+                      <div className="button-wrapper">
+                        <button
+                          title="Back"
+                          onClick={reset}>
+                          Back
+                        </button>
+                        <button
+                          title="Submit"
+                          onClick={() => handleEncode('mp3')}>
+                          Done
+                        </button>
                       </div>
                     </div>
-                    <div className="button-wrapper">
-                      <button
-                        title="Back"
-                        onClick={reset}>
-                        Back
-                      </button>
-                      <button
-                        title="Submit"
-                        onClick={() => handleEncode('mp3')}>
-                        Done
-                      </button>
-                    </div>
-                  </div>
-                </>
-                )
-              }
-            </Window>
-            {
-            (state.processing || state.outputUrl) ?
+                  </>
+                  )
+                }
+              </Window>
+            ): (
               <Window id="audio-output" title="Output">
                 {
                   !state.processing ? (
                     <>
-                      <Output url={state.outputUrl} />
-                      <div className="dropdown list-wrap">
+                      <Output url={state.outputUrl} dropTime={state.startTime} />
+                      <div className="button-wrapper">
+                        <button
+                          type="button"
+                          onClick={() => setState({outputScreen: false})}
+                        >
+                          Edit
+                        </button>
                         <button
                           type="button"
                           onClick={() => download(state.outputUrl!, rename(state.file!.name, 'mp3'))}
@@ -307,12 +312,8 @@ function App() {
                     </div>
                   </div>
                 }
-                
               </Window>
-              :
-              <></>
-            }
-          </>
+            )
         ) : (
           <Window id="audio-upload" title="Upload" startup={true}>
             <img src={logo} />
