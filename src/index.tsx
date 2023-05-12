@@ -212,7 +212,7 @@ function App() {
                   ) : (
                     <>
                     <div className="player-wrapper">
-                      <p>Choose where you want the drop to start.</p>
+                      <p>Use the time slider to mark when you want the country riddim drop to start.</p>
                       <Player
                         audioBuffer={state.audioBuffer!}
                         blob={state.file!}
