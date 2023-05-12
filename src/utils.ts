@@ -44,7 +44,8 @@ export const readBlobURL = (file: Blob) => URL.createObjectURL(file);
 export const download = (url: string, name: string) => {
   const link = document.createElement('a');
   link.href = url;
-  link.download = name;
+  const nameParts = name.split('.');
+  link.download = nameParts[0].concat('-country-riddim').concat('.').concat(nameParts[1]);
   link.click();
 };
 
